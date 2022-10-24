@@ -1,12 +1,12 @@
 public class Main {
-    private static void testCounterResult(Counter counter, final int ITERS_COUNT) {
+    private static void testCounterResult(Counter counter, final int itersCount) {
         Thread thread1 = new Thread(() -> {
-            for (int i = 0; i < ITERS_COUNT; i++) {
+            for (int i = 0; i < itersCount; i++) {
                 counter.increment();
             }
         });
         Thread thread2 = new Thread(() -> {
-            for (int i = 0; i < ITERS_COUNT; i++) {
+            for (int i = 0; i < itersCount; i++) {
                 counter.decrement();
             }
         });
@@ -38,12 +38,12 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        final int ITERS_COUNT = 1000000;
+        final int itersCount = 1000000;
         CounterImpl counter = new CounterImpl();
         SynchronizedCounterImpl synchronizedCounter = new SynchronizedCounterImpl();
 
-        testCounterResult(counter, ITERS_COUNT); // differs
-        testCounterResult(synchronizedCounter, ITERS_COUNT); // 0
+        testCounterResult(counter, itersCount); // differs
+        testCounterResult(synchronizedCounter, itersCount); // 0
 
         testMaxThreadsCount(); // 3700
     }

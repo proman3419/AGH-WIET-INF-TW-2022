@@ -1,0 +1,25 @@
+2.
+Uruchamiając
+    mvn compile exec:java -D exec.mainClass=org.example.zad1_2.Main -D exec.args="if"
+można przetestować semafor zaimplementowany przy użyciu if.
+Przykładowy wynik programu:
+    Counters' final values: [-11, -1, -4, 9, -2, 12, -12, -12, -20, -2, -8, 10, -24, -2, -2, -11, -5, 1, -1, 5, -2, -11, 5, -9, -4]
+
+Uruchamiając
+    mvn compile exec:java -D exec.mainClass=org.example.zad1_2.Main -D exec.args="while"
+można przetestować semafor zaimplementowany przy użyciu while.
+Przykładowy wynik programu:
+    Counters' final values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+Jak widać semafor wykorzystujący instrukcję if daje końcowe wyniki różne od 0 w przeciwieństwie do semafora
+zaimplementowanego przy użyciu instrukcji while.
+Spowodowane jest to faktem, że wątek może się wybudzić nawet gdy nie została wywołane notify() lub notifyAll().
+
+3.
+Uruchamiając
+    mvn compile exec:java -D exec.mainClass=org.example.zad3.Main
+można przetestować semafor zliczający (ogólny).
+Program symuluje użytkowników korzystających z pewnej ilości wspólnych zasobów.
+
+Semafor binarny jest szczególnym przypadkiem semafora ogólnego. Jest to semafor ogólny o początkowej ilości dostępnych
+zasobów równej 1.

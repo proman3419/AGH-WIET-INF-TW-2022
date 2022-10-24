@@ -1,4 +1,4 @@
-package org.example;
+package org.example.zad1_2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,37 +25,39 @@ public class Race {
         semaphore.V();
     }
 
-    public void start(final int THREADS_COUNT, final long ITERS_COUNT) {
-        System.out.printf("%d incrementing and decrementing threads, each of them does %d iterations\n", THREADS_COUNT, ITERS_COUNT);
+    public void start(final int threadsCount, final long itersCount) {
+        System.out.printf("%d incrementing and decrementing threads, each of them performs %d iterations\n",
+                threadsCount, itersCount);
 
         System.out.println("Creating threads");
         List<Thread> incThreads = Stream.generate(() -> new Thread(() -> {
-            for (int i = 0; i < ITERS_COUNT; i++) {
+            for (int i = 0; i < itersCount; i++) {
                 increment();
             }
-        })).limit(THREADS_COUNT).collect(Collectors.toCollection(ArrayList::new));
+        })).limit(threadsCount).collect(Collectors.toCollection(ArrayList::new));
         List<Thread> decThreads = Stream.generate(() -> new Thread(() -> {
-            for (int i = 0; i < ITERS_COUNT; i++) {
+            for (int i = 0; i < itersCount; i++) {
                 decrement();
             }
-        })).limit(THREADS_COUNT).collect(Collectors.toCollection(ArrayList::new));
+        })).limit(threadsCount).collect(Collectors.toCollection(ArrayList::new));
 
         System.out.println("Starting threads");
-        for (int i = 0; i < THREADS_COUNT; i++) {
-            incThreads.get(i).start();
-            decThreads.get(i).start();
-        }
+        incThreads.forEach(Thread::start);
+        decThreads.forEach(Thread::start);
 
-        try {
-            for (int i = 0; i < THREADS_COUNT; i++) {
+        for (int i = 0; i < threadsCount; i++) {
+            try {
                 incThreads.get(i).join();
                 decThreads.get(i).join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-            System.exit(1);
         }
 
-        System.out.printf("Finished the race, counter's state: %d\n", counter);
+        System.out.printf("Finished the race, the counter's state: %d\n", counter);
+    }
+
+    public long getCounter() {
+        return counter;
     }
 }

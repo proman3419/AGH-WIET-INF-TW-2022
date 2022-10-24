@@ -1,4 +1,7 @@
-package org.example;
+package org.example.zad3;
+
+import org.example.zad1_2.BinarySemaphoreWhile;
+import org.example.zad1_2.Semaphore;
 
 class CountingSemaphore implements Semaphore {
     private int state;
@@ -6,13 +9,18 @@ class CountingSemaphore implements Semaphore {
     private final BinarySemaphoreWhile canDecrease;
 
     public CountingSemaphore(int state) {
-        this.state = state;
+        if (state <= 0) {
+            System.out.println("The state's value should be positive, setting 1 as the default value");
+            this.state = 1;
+        } else {
+            this.state = state;
+        }
         stateAccess = new BinarySemaphoreWhile();
         canDecrease = new BinarySemaphoreWhile();
     }
 
     @Override
-    public void P() {
+    public void P() { // sleep
         canDecrease.P();
         stateAccess.P();
 
@@ -25,7 +33,7 @@ class CountingSemaphore implements Semaphore {
     }
 
     @Override
-    public void V() {
+    public void V() { // wake-up
         stateAccess.P();
 
         state++;
