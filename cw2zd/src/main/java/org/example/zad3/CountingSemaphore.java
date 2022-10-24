@@ -20,7 +20,7 @@ class CountingSemaphore implements Semaphore {
     }
 
     @Override
-    public void P() { // sleep
+    public void P() { // lock
         canDecrease.P();
         stateAccess.P();
 
@@ -33,14 +33,12 @@ class CountingSemaphore implements Semaphore {
     }
 
     @Override
-    public void V() { // wake-up
+    public void V() { // unlock
         stateAccess.P();
 
         state++;
 
-        if (state >= 1) {
-            canDecrease.V();
-        }
+        canDecrease.V();
         stateAccess.V();
     }
 }

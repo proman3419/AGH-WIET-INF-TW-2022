@@ -8,7 +8,7 @@ class BinarySemaphoreIf implements Semaphore {
     }
 
     @Override
-    public synchronized void P() { // sleep
+    public synchronized void P() { // lock
         awaits++;
         if (!state) {
             try {
@@ -17,12 +17,12 @@ class BinarySemaphoreIf implements Semaphore {
                 e.printStackTrace();
             }
         }
-        state = false;
         awaits--;
+        state = false;
     }
 
     @Override
-    public synchronized void V() { // wake-up
+    public synchronized void V() { // unlock
         if (awaits > 0) {
             notify();
         }
