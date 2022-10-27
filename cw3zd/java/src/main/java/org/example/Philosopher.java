@@ -3,14 +3,14 @@ package org.example;
 import java.util.concurrent.Semaphore;
 
 public abstract class Philosopher extends Thread {
-    public  static final long ITERS_COUNT = 30;
-    protected static final long EATING_TIME = 100;
-    protected static final long THINKING_TIME = 100;
+    public static final long ITERS_COUNT = 30;
+    protected static final long EAT_TIME = 100;
+    protected static final long THINK_TIME = 100;
     protected final Semaphore left;
     protected final Semaphore right;
     protected final int id;
-    protected long eatingCount = 0;
-    protected long thinkingCount = 0;
+    protected long eatCount = 0;
+    protected long thinkCount = 0;
     protected long waitTime = 0;
 
     public Philosopher(int id, Semaphore left, Semaphore right) {
@@ -20,7 +20,7 @@ public abstract class Philosopher extends Thread {
     }
 
     protected void eatNotify() {
-        System.out.printf("Philosopher %d is eating for the %d. time\n", id, eatingCount);
+        System.out.printf("Philosopher %d is eating for the %d. time\n", id, eatCount);
     }
 
     protected void eatEndNotify() {
@@ -28,7 +28,7 @@ public abstract class Philosopher extends Thread {
     }
 
     protected void thinkNotify() {
-        System.out.printf("Philosopher %d is thinking for the %d. time\n", id, thinkingCount);
+        System.out.printf("Philosopher %d is thinking for the %d. time\n", id, thinkCount);
     }
 
     protected void thinkEndNotify() {
@@ -36,10 +36,10 @@ public abstract class Philosopher extends Thread {
     }
 
     protected void eatBase() {
-        eatingCount++;
+        eatCount++;
         eatNotify();
         try {
-            Thread.sleep(EATING_TIME);
+            Thread.sleep(EAT_TIME);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -49,11 +49,11 @@ public abstract class Philosopher extends Thread {
     protected abstract void eat();
 
     private void think() {
-        thinkingCount++;
+        thinkCount++;
         thinkNotify();
         try {
             long startTime = System.nanoTime();
-            sleep(THINKING_TIME);
+            sleep(THINK_TIME);
             long deltaTime = System.nanoTime() - startTime;
             waitTime += deltaTime;
         } catch (InterruptedException e) {
@@ -74,7 +74,7 @@ public abstract class Philosopher extends Thread {
         return waitTime;
     }
 
-    public long getEatingCount() {
-        return eatingCount;
+    public long getEatCount() {
+        return eatCount;
     }
 }

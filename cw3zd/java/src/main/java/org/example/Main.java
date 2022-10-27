@@ -15,7 +15,7 @@ public class Main {
 
     private static List<Long> getEatingCounts(List<Philosopher> philosophers) {
         return philosophers.stream()
-                .map(Philosopher::getEatingCount)
+                .map(Philosopher::getEatCount)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
