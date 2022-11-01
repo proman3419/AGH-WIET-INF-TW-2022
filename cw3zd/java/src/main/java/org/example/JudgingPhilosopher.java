@@ -12,15 +12,18 @@ public class JudgingPhilosopher extends Philosopher {
 
     @Override
     protected void eat() {
-        if (judge.tryAcquire()) {
-            if (left.tryAcquire()) {
-                if (right.tryAcquire()) {
-                    eatBase();
-                    right.release();
-                }
-                left.release();
-            }
-            judge.release();
+        while (!judge.tryAcquire()) {
+            waitTime(25);
         }
+        try {
+            left.acquire();
+            right.acquire();
+            eatBase();
+            left.release();
+            right.release();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        judge.release();
     }
 }

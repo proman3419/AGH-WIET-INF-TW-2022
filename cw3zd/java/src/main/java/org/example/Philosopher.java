@@ -51,15 +51,19 @@ public abstract class Philosopher extends Thread {
     private void think() {
         thinkCount++;
         thinkNotify();
+        waitTime(THINK_TIME);
+        thinkEndNotify();
+    }
+
+    protected void waitTime(long time) {
         try {
             long startTime = System.nanoTime();
-            sleep(THINK_TIME);
+            sleep(time);
             long deltaTime = System.nanoTime() - startTime;
             waitTime += deltaTime;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        thinkEndNotify();
     }
 
     @Override

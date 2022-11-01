@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
-    private static List<Double> getAverageWaitTimes(List<Philosopher> philosophers, double unit) {
+    private static List<Double> getAverageWaitTimesInMiliseconds(List<Philosopher> philosophers, double unit) {
         return philosophers.stream()
                 .map(philosopher -> (((double) philosopher.getWaitTime() * unit) / Philosopher.ITERS_COUNT))
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -29,8 +29,12 @@ public class Main {
             }
         });
 
-        System.out.println(getAverageWaitTimes(philosophers, Math.pow(10, -9)));
-        System.out.println(getEatingCounts(philosophers));
+        System.out.print("Average wait times [ms]: ");
+        // waitTime [ns]
+        getAverageWaitTimesInMiliseconds(philosophers, Math.pow(10, -6))
+                .forEach(waitTime -> System.out.printf("%.0f, ", waitTime));
+        System.out.print("\nEating counts: ");
+        getEatingCounts(philosophers).forEach(eatingCount -> System.out.printf("%d, ", eatingCount));
     }
 
     private static void testStarvingPhilosopher(int philosophersCount) {
@@ -50,7 +54,7 @@ public class Main {
                 .generate(() -> new Semaphore(1))
                 .limit(philosophersCount)
                 .collect(Collectors.toCollection(ArrayList::new));
-        Semaphore judge = new Semaphore(1);
+        Semaphore judge = new Semaphore(philosophersCount - 1);
         List<Philosopher> philosophers = new ArrayList<>();
         for (int i = 0; i < philosophersCount; i++) {
             philosophers.add(new JudgingPhilosopher(i, sticks.get(i), sticks.get((i + 1) % philosophersCount), judge));
@@ -60,6 +64,6 @@ public class Main {
 
     public static void main(String[] args) {
         testStarvingPhilosopher(25);
-//        testJudgingPhilosopher(5);
+//        testJudgingPhilosopher(25);
     }
 }
