@@ -28,7 +28,7 @@ Fork.prototype.acquire = function(cb) {
     // zawsze czekamy na początku acquire, więc można potraktować to jako czas na myślenie
 
     var fork = this;
-    var rec = function(waitTime) {
+    var recAcquire = function(waitTime) {
         setTimeout(function() {
             if (fork.state == 0) {
                 fork.state = 1;
@@ -37,12 +37,12 @@ Fork.prototype.acquire = function(cb) {
                 if (waitTime < 32768) {
                     waitTime *= 2;
                 }
-                rec(waitTime);
+                recAcquire(waitTime);
             }
         }, waitTime)
     };
     
-    rec(1);
+    recAcquire(1);
 }
 
 Fork.prototype.release = function() { 
@@ -54,7 +54,7 @@ var Philosopher = function(id, forks) {
     this.forks = forks;
     this.f1 = id % forks.length;
     this.f2 = (id+1) % forks.length;
-    this.EAT_TIME = 1;
+    this.EAT_TIME = 10;
     this.eatCount = 0;
     this.waitTime = 0;
     this.waitStartTime = 0;
@@ -76,19 +76,21 @@ Philosopher.prototype.startNaive = function(count) {
 	    philosopher.waitStartTime = new Date().getTime();
 	    if (count > 0) {
             forks[f1].acquire(function() {
-                console.log(`Philosopher ${id} has acquired the left fork`);
+                if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the left fork`);
                 forks[f2].acquire(function() {
-                    philosopher.totalWaitTime += new Date().getTime() - philosopher.currentWaitStartTime;
+                    philosopher.waitTime += new Date().getTime() - philosopher.waitStartTime;
                     philosopher.eatCount++;
-                    console.log(`Philosopher ${id} has acquired the right fork and proceeds to eat for the ${philosopher.eatCount}. time`);
+                    if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the right fork and proceeds to eat for the ${philosopher.eatCount}. time`);
                     setTimeout(function() {
                         forks[f1].release();
                         forks[f2].release();
-                        console.log(`Philosopher ${id} has ended eating`);
+                        if (PRINT_ALL) console.log(`Philosopher ${id} has ended eating`);
                         recNaive(count - 1);
                     }, philosopher.EAT_TIME)
                 })
             });
+        } else {
+            RUNNING_PHILOSOPHERS--;
         }
     };
 
@@ -113,62 +115,95 @@ Philosopher.prototype.startAsym = function(count) {
 	    philosopher.waitStartTime = new Date().getTime();
 	    if (count > 0) {
             forks[f1].acquire(function() {
-                console.log(`Philosopher ${id} has acquired the 1st fork`);
+                if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the 1st fork`);
                 forks[f2].acquire(function() {
-                    philosopher.totalWaitTime += new Date().getTime() - philosopher.currentWaitStartTime;
+                    philosopher.waitTime += new Date().getTime() - philosopher.waitStartTime;
                     philosopher.eatCount++;
-                    console.log(`Philosopher ${id} has acquired the 2nd fork and proceeds to eat for the ${philosopher.eatCount}. time`);
+                    if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the 2nd fork and proceeds to eat for the ${philosopher.eatCount}. time`);
                     setTimeout(function() {
                         forks[f1].release();
                         forks[f2].release();
-                        console.log(`Philosopher ${id} has ended eating`);
+                        if (PRINT_ALL) console.log(`Philosopher ${id} has ended eating`);
                         recAsym(count - 1);
                     }, philosopher.EAT_TIME)
                 })
             });
+        } else {
+            RUNNING_PHILOSOPHERS--;
         }
     };
 
     recAsym(count);
 }
 
-// Conductor = function() {
+Conductor = function(philosophersCount) {
+    this.state = philosophersCount - 1;
+
+    return this;
+}
+
+Conductor.prototype.acquire = function(cb) {
+    var conductor = this;
     
-// }
-
-// Philosopher.prototype.startConductor = function(count) {
-//     var forks = this.forks,
-//         f1 = this.f1,
-//         f2 = this.f2,
-//         id = this.id,
-//         philosopher = this;
+    var recAcquire = function(waitTime) {
+        setTimeout(function() {
+            if (conductor.state > 0) {
+                conductor.state--;
+                cb();
+            } else {
+                if (waitTime < 32768) {
+                    waitTime *= 2;
+                }
+                recAcquire(waitTime);
+            }
+        }, waitTime)
+    };
     
-//     // zaimplementuj rozwiązanie z kelnerem
-//     // każdy filozof powinien 'count' razy wykonywać cykl
-//     // podnoszenia widelców -- jedzenia -- zwalniania widelców
+    recAcquire(1);
+}
 
-//     var recConductor = function(count) {
-// 	    philosopher.waitStartTime = new Date().getTime();
-// 	    if (count > 0) {
-//             forks[f1].acquire(function() {
-//                 console.log(`Philosopher ${id} has acquired the 1st fork`);
-//                 forks[f2].acquire(function() {
-//                     philosopher.totalWaitTime += new Date().getTime() - philosopher.currentWaitStartTime;
-//                     philosopher.eatCount++;
-//                     console.log(`Philosopher ${id} has acquired the 2nd fork and proceeds to eat for the ${philosopher.eatCount}. time`);
-//                     setTimeout(function() {
-//                         forks[f1].release();
-//                         forks[f2].release();
-//                         console.log(`Philosopher ${id} has ended eating`);
-//                         recConductor(count - 1);
-//                     }, philosopher.EAT_TIME)
-//                 })
-//             });
-//         }
-//     };
+Conductor.prototype.release = function() {
+    this.state++;
+}
 
-//     recConductor(count);
-// }
+Philosopher.prototype.startConductor = function(count, conductor) {
+    var forks = this.forks,
+        f1 = this.f1,
+        f2 = this.f2,
+        id = this.id,
+        philosopher = this;
+    
+    // zaimplementuj rozwiązanie z kelnerem
+    // każdy filozof powinien 'count' razy wykonywać cykl
+    // podnoszenia widelców -- jedzenia -- zwalniania widelców
+
+    var recConductor = function(count) {
+	    philosopher.waitStartTime = new Date().getTime();
+	    if (count > 0) {
+            conductor.acquire(function() {
+                forks[f1].acquire(function() {
+                    if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the left fork`);
+                    forks[f2].acquire(function() {
+                        philosopher.waitTime += new Date().getTime() - philosopher.waitStartTime;
+                        philosopher.eatCount++;
+                        if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the right fork and proceeds to eat for the ${philosopher.eatCount}. time`);
+                        setTimeout(function() {
+                            forks[f1].release();
+                            forks[f2].release();
+                            conductor.release();
+                            if (PRINT_ALL) console.log(`Philosopher ${id} has ended eating`);
+                            recConductor(count - 1);
+                        }, philosopher.EAT_TIME)
+                    })
+                })
+            });
+        } else {
+            RUNNING_PHILOSOPHERS--;
+        }
+    };
+
+    recConductor(count);
+}
 
 // TODO: wersja z jednoczesnym podnoszeniem widelców
 // Algorytm BEB powinien obejmować podnoszenie obu widelców, 
@@ -192,7 +227,6 @@ function acquireBoth(cb, fork1, fork2) {
     rec(1);
 }
 
-
 Philosopher.prototype.startPickupBoth = function(count) {
     var forks = this.forks,
         f1 = this.f1,
@@ -208,35 +242,79 @@ Philosopher.prototype.startPickupBoth = function(count) {
 	    philosopher.waitStartTime = new Date().getTime();
 	    if (count > 0) {
             acquireBoth(function() {
-                philosopher.totalWaitTime += new Date().getTime() - philosopher.currentWaitStartTime;
+                philosopher.waitTime += new Date().getTime() - philosopher.waitStartTime;
                 philosopher.eatCount++;
-                console.log(`Philosopher ${id} has acquired both forks and proceeds to eat for the ${philosopher.eatCount}. time`);
+                if (PRINT_ALL) console.log(`Philosopher ${id} has acquired both forks and proceeds to eat for the ${philosopher.eatCount}. time`);
                 setTimeout(function() {
                     forks[f1].release();
                     forks[f2].release();
-                    console.log(`Philosopher ${id} has ended eating`);
+                    if (PRINT_ALL) console.log(`Philosopher ${id} has ended eating`);
                     recPickupBoth(count - 1);
                 }, philosopher.EAT_TIME)
             }, forks[f1], forks[f2]);
+        } else {
+            RUNNING_PHILOSOPHERS--;
         }
     };
 
     recPickupBoth(count);
 }
 
-var N = 5;
-var forks = [];
-var philosophers = []
-for (var i = 0; i < N; i++) {
-    forks.push(new Fork());
+var RUNNING_PHILOSOPHERS;
+var test = function(N, itersCount, methodName) {
+    RUNNING_PHILOSOPHERS = N;
+    var forks = [];
+    var philosophers = [];
+    for (var i = 0; i < N; i++) {
+        forks.push(new Fork());
+    }
+    
+    for (var i = 0; i < N; i++) {
+        philosophers.push(new Philosopher(i, forks));
+    }
+    
+    var conductor;
+    if (methodName == "arbiter") {
+        conductor = new Conductor(N);
+    }
+
+    for (var i = 0; i < N; i++) {
+        if (methodName == "naive") {
+            philosophers[i].startNaive(itersCount);
+        } else if (methodName == "asym") {
+            philosophers[i].startAsym(itersCount);
+        } else if (methodName == "arbiter") {
+            philosophers[i].startConductor(itersCount, conductor);
+        } else if (methodName == "pickupboth") {
+            philosophers[i].startPickupBoth(itersCount);
+        }
+    }
+
+    var waitForPhilosophersTermination = function(cb) {
+        setTimeout(function() {
+            if (RUNNING_PHILOSOPHERS > 0) {
+                waitForPhilosophersTermination(cb);
+            } else {
+                cb();
+            }
+        }, 1000)
+    }
+
+    waitForPhilosophersTermination(function() {
+        process.stdout.write("Average wait times [ms]: ");
+        philosophers.forEach(philosopher => process.stdout.write(`${philosopher.waitTime / itersCount}, `));
+        console.log();
+    });
 }
 
-for (var i = 0; i < N; i++) {
-    philosophers.push(new Philosopher(i, forks));
-}
+var args = process.argv.slice(2);
+if (args.length < 4) {
+    console.log("Expected 4 arguments: numberOfPhilosophers, itersCount, methodName <naive/asym/arbiter/pickupboth>, printAll <true/false>");
+} else {
+    var N = parseInt(args[0]),
+    itersCount = parseInt(args[1]),
+    methodName = args[2],
+    PRINT_ALL = (args[3] == "true");
 
-for (var i = 0; i < N; i++) {
-    // philosophers[i].startNaive(10);
-    // philosophers[i].startAsym(10);
-    philosophers[i].startPickupBoth(10);
+    test(N, itersCount, methodName);
 }
