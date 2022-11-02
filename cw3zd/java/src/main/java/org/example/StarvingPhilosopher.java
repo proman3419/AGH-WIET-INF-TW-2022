@@ -9,12 +9,15 @@ public class StarvingPhilosopher extends Philosopher {
 
     @Override
     protected void eat() {
-        if (left.tryAcquire()) {
-            if (right.tryAcquire()) {
-                eatBase();
-                right.release();
-            }
-            left.release();
+        try {
+            left.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+        if (right.tryAcquire()) {
+            eatBase();
+            right.release();
+        }
+        left.release();
     }
 }

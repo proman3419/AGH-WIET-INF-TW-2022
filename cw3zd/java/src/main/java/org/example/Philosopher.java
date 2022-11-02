@@ -3,7 +3,6 @@ package org.example;
 import java.util.concurrent.Semaphore;
 
 public abstract class Philosopher extends Thread {
-    public static final long ITERS_COUNT = 30;
     protected static final long EAT_TIME = 100;
     protected static final long THINK_TIME = 100;
     protected final Semaphore left;
@@ -20,19 +19,19 @@ public abstract class Philosopher extends Thread {
     }
 
     protected void eatNotify() {
-        System.out.printf("Philosopher %d is eating for the %d. time\n", id, eatCount);
+        if (Main.PRINT_ALL) System.out.printf("Philosopher %d is eating for the %d. time\n", id, eatCount);
     }
 
     protected void eatEndNotify() {
-        System.out.printf("Philosopher %d has ended eating\n", id);
+        if (Main.PRINT_ALL) System.out.printf("Philosopher %d has ended eating\n", id);
     }
 
     protected void thinkNotify() {
-        System.out.printf("Philosopher %d is thinking for the %d. time\n", id, thinkCount);
+        if (Main.PRINT_ALL) System.out.printf("Philosopher %d is thinking for the %d. time\n", id, thinkCount);
     }
 
     protected void thinkEndNotify() {
-        System.out.printf("Philosopher %d has ended thinking\n", id);
+        if (Main.PRINT_ALL) System.out.printf("Philosopher %d has ended thinking\n", id);
     }
 
     protected void eatBase() {
@@ -68,10 +67,10 @@ public abstract class Philosopher extends Thread {
 
     @Override
     public void run() {
-        for (int i = 0; i < ITERS_COUNT; i++) {
+        do {
             eat();
             think();
-        }
+        } while (eatCount < Main.ITERS_COUNT);
     }
 
     public long getWaitTime() {

@@ -7,15 +7,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
+    public static long ITERS_COUNT;
+    public static boolean PRINT_ALL;
+
     private static List<Double> getAverageWaitTimesInMiliseconds(List<Philosopher> philosophers, double unit) {
         return philosophers.stream()
-                .map(philosopher -> (((double) philosopher.getWaitTime() * unit) / Philosopher.ITERS_COUNT))
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    private static List<Long> getEatingCounts(List<Philosopher> philosophers) {
-        return philosophers.stream()
-                .map(Philosopher::getEatCount)
+                .map(philosopher -> (((double) philosopher.getWaitTime() * unit) / ITERS_COUNT))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -33,8 +30,7 @@ public class Main {
         // waitTime [ns]
         getAverageWaitTimesInMiliseconds(philosophers, Math.pow(10, -6))
                 .forEach(waitTime -> System.out.printf("%.0f, ", waitTime));
-        System.out.print("\nEating counts: ");
-        getEatingCounts(philosophers).forEach(eatingCount -> System.out.printf("%d, ", eatingCount));
+        System.out.println();
     }
 
     private static void testStarvingPhilosopher(int philosophersCount) {
@@ -63,7 +59,19 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        testStarvingPhilosopher(25);
-//        testJudgingPhilosopher(25);
+        if (args.length < 4) {
+            System.out.println("Expected 4 arguments: numberOfPhilosophers, itersCount, methodName <starving/arbiter>, printAll <true/false>");
+        } else {
+            int philosophersCount = Integer.parseInt(args[0]);
+            ITERS_COUNT = Integer.parseInt(args[1]);
+            String methodName = args[2];
+            PRINT_ALL = Boolean.parseBoolean(args[3]);
+
+            if (methodName.equals("starving")) {
+                testStarvingPhilosopher(philosophersCount);
+            } else if (methodName.equals("arbiter")) {
+                testJudgingPhilosopher(philosophersCount);
+            }
+        }
     }
 }
