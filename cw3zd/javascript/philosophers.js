@@ -78,7 +78,8 @@ Philosopher.prototype.startNaive = function(count) {
             forks[f1].acquire(function() {
                 if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the left fork`);
                 forks[f2].acquire(function() {
-                    philosopher.waitTime += new Date().getTime() - philosopher.waitStartTime;
+                    var deltaTime = new Date().getTime() - philosopher.waitStartTime;
+                    philosopher.waitTime += deltaTime;
                     philosopher.eatCount++;
                     if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the right fork and proceeds to eat for the ${philosopher.eatCount}. time`);
                     setTimeout(function() {
@@ -117,7 +118,8 @@ Philosopher.prototype.startAsym = function(count) {
             forks[f1].acquire(function() {
                 if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the 1st fork`);
                 forks[f2].acquire(function() {
-                    philosopher.waitTime += new Date().getTime() - philosopher.waitStartTime;
+                    var deltaTime = new Date().getTime() - philosopher.waitStartTime;
+                    philosopher.waitTime += deltaTime;
                     philosopher.eatCount++;
                     if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the 2nd fork and proceeds to eat for the ${philosopher.eatCount}. time`);
                     setTimeout(function() {
@@ -185,7 +187,8 @@ Philosopher.prototype.startConductor = function(count, conductor) {
                     forks[f1].acquire(function() {
                         if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the left fork`);
                         forks[f2].acquire(function() {
-                            philosopher.waitTime += new Date().getTime() - philosopher.waitStartTime;
+                            var deltaTime = new Date().getTime() - philosopher.waitStartTime;
+                            philosopher.waitTime += deltaTime;
                             philosopher.eatCount++;
                             if (PRINT_ALL) console.log(`Philosopher ${id} has acquired the right fork and proceeds to eat for the ${philosopher.eatCount}. time`);
                             setTimeout(function() {
