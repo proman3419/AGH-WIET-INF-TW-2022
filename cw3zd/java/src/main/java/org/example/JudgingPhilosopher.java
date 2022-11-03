@@ -12,18 +12,21 @@ public class JudgingPhilosopher extends Philosopher {
 
     @Override
     protected void eat() {
-        while (!judge.tryAcquire()) {
-            waitTime(25);
-        }
+        long startTime = System.nanoTime();
+        while (!judge.tryAcquire()) ;
+        long endTime;
         try {
             left.acquire();
             right.acquire();
+            endTime = System.nanoTime();
             eatBase();
             left.release();
             right.release();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            endTime = System.nanoTime();
         }
         judge.release();
+        waitTime += endTime - startTime;
     }
 }

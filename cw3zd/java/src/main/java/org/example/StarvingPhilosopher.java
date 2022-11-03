@@ -9,15 +9,21 @@ public class StarvingPhilosopher extends Philosopher {
 
     @Override
     protected void eat() {
+        long startTime = System.nanoTime();
         try {
             left.acquire();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        long endTime;
         if (right.tryAcquire()) {
+            endTime = System.nanoTime();
             eatBase();
             right.release();
+        } else {
+            endTime = System.nanoTime();
         }
         left.release();
+        waitTime += endTime - startTime;
     }
 }

@@ -50,16 +50,13 @@ public abstract class Philosopher extends Thread {
     private void think() {
         thinkCount++;
         thinkNotify();
-        waitTime(THINK_TIME);
+        handledSleep(THINK_TIME);
         thinkEndNotify();
     }
 
-    protected void waitTime(long time) {
+    protected void handledSleep(long time) {
         try {
-            long startTime = System.nanoTime();
             sleep(time);
-            long deltaTime = System.nanoTime() - startTime;
-            waitTime += deltaTime;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -68,8 +65,8 @@ public abstract class Philosopher extends Thread {
     @Override
     public void run() {
         do {
-            eat();
             think();
+            eat();
         } while (eatCount < Main.ITERS_COUNT);
     }
 
