@@ -134,8 +134,24 @@ class SchedulingProblem:
         except AttributeError:
             print("Run `solve` first")
 
+    def _relation_pretty_str(self, relation):
+        s = "{"
+        for r in relation:
+            s += f"({r[0]}, {r[1]}), "
+        s = s[:-2] + '}'
+        return s
+
+    def _foata_normal_form_pretty_str(self):
+        s = ''
+        for fc in self.FNF:
+            s += f"({''.join(fc)})"
+        return s
+
     def __str__(self):
         try:
-            return f"D: {sorted(self.D)}\nI: {sorted(self.I)}\nFNF: {self.FNF}\n"
+            pD = self._relation_pretty_str(sorted(self.D))
+            pI = self._relation_pretty_str(sorted(self.I))
+            pFNF = self._foata_normal_form_pretty_str()
+            return f"D = {pD}\nI = {pI}\nFNF = {pFNF}\n"
         except (TypeError, AttributeError):
             return "Run `solve` first"
