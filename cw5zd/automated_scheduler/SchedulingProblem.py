@@ -123,7 +123,7 @@ class SchedulingProblem:
 
     def save(self, save_dir):
         try:
-            self.dependencies_graph.render(directory=save_dir, view=True)
+            self.dependencies_graph.render(directory=save_dir)
             solution_save_path = os.path.join(save_dir, "solution.txt")
             with open(solution_save_path, "w+") as f:
                 f.write(str(self))
